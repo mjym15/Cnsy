@@ -1,0 +1,1319 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C N S Y — Consistency over motivation</title>
+  <meta name="description" content="CNSY – Individuelle Trainingspläne und ehrliches Coaching für Fußballer und Menschen, die zu Hause stärker, fitter und konstanter werden wollen.">
+  <style>
+    :root{
+      --bg:#0a0d12;
+      --bg2:#0d1118;
+      --panel:rgba(255,255,255,.035);
+      --panel-strong:rgba(255,255,255,.055);
+      --text:#f5f7fb;
+      --muted:#a6b0c2;
+      --line:rgba(255,255,255,.09);
+      --line-2:rgba(255,255,255,.16);
+      --shadow:0 24px 70px rgba(0,0,0,.34);
+      --max:1180px;
+      --radius:24px;
+      --radius-sm:18px;
+      --ease:cubic-bezier(.22,.8,.22,1);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.06), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 24%),
+        linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
+      line-height:1.55;
+      overflow-x:hidden;
+    }
+
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+
+    /* NAV */
+    .nav{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(10,13,18,.72);
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{
+      min-height:82px;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.58em;
+      padding-left:.12em;
+      font-size:1.02rem;
+    }
+    .nav-right{
+      display:flex;align-items:center;gap:16px;
+    }
+    .nav-chip{
+      padding:12px 18px;
+      border-radius:999px;
+      border:1px solid var(--line-2);
+      background:linear-gradient(180deg, rgba(245,247,251,.98), rgba(222,229,240,.95));
+      color:#0a0d12;
+      font-weight:800;
+      box-shadow:0 10px 28px rgba(255,255,255,.06), inset 0 1px 0 rgba(255,255,255,.55);
+      cursor:pointer;
+      transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+    }
+    .nav-chip:hover{transform:translateY(-1px)}
+    .menu-btn{
+      width:52px;height:52px;border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      transition:transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
+    }
+    .menu-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.05);border-color:var(--line-2)}
+    .menu-bars{
+      width:22px;height:16px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .menu-bars span{
+      display:block;height:2px;border-radius:10px;background:#f5f7fb;
+      transform-origin:center;
+    }
+
+    /* DRAWER */
+    .drawer-overlay{
+      position:fixed;inset:0;z-index:70;
+      background:rgba(3,6,10,.48);
+      backdrop-filter:blur(5px);
+      opacity:0;pointer-events:none;
+      transition:opacity .36s var(--ease);
+    }
+    .drawer-overlay.show{opacity:1;pointer-events:auto}
+    .drawer{
+      position:fixed;top:0;right:0;height:100%;width:min(380px,88vw);
+      z-index:71;
+      background:linear-gradient(180deg,#10141b 0%, #0c1016 100%);
+      border-left:1px solid var(--line-2);
+      box-shadow:-20px 0 60px rgba(0,0,0,.42);
+      transform:translateX(104%);
+      transition:transform .42s var(--ease);
+      padding:22px;
+      display:flex;flex-direction:column;
+      overflow:hidden;
+    }
+    .drawer.show{transform:translateX(0)}
+    .drawer-top{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;
+      position:relative;z-index:2;
+    }
+    .drawer-close{
+      width:46px;height:46px;border-radius:50%;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);color:var(--text);
+      font-size:1.15rem;cursor:pointer;
+    }
+    .drawer-stage{
+      position:relative;
+      flex:1;
+      overflow:hidden;
+      min-height:0;
+    }
+    .drawer-view{
+      position:absolute;inset:0;
+      transition:transform .42s var(--ease), opacity .3s var(--ease);
+    }
+    .drawer-view.root-view{transform:translateX(0);opacity:1}
+    .drawer.submenu-open .drawer-view.root-view{
+      transform:translateX(-100%);
+      opacity:0;
+      pointer-events:none;
+      visibility:hidden;
+    }
+    .drawer-view.sub-view{
+      transform:translateX(108%);
+      opacity:1;
+      overflow:auto;
+      padding-right:2px;
+      background:linear-gradient(180deg,#10141b 0%, #0c1016 100%);
+      z-index:3;
+    }
+    .drawer.submenu-open .drawer-view.sub-view{transform:translateX(0)}
+    .drawer-links{
+      display:grid;gap:10px;
+    }
+    .submenu-top{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:18px;
+      padding-top:2px;
+    }
+    .back-btn{
+      width:42px;height:42px;border-radius:50%;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);cursor:pointer;font-size:1rem;
+      transition:transform .25s var(--ease), background .25s var(--ease);
+      flex:0 0 auto;
+    }
+    .back-btn:hover{transform:translateX(-2px);background:rgba(255,255,255,.05)}
+    .submenu-title{
+      font-weight:800;
+      letter-spacing:-.02em;
+      font-size:1.05rem;
+    }
+    .drawer-link{
+      padding:16px 18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      transition:transform .28s var(--ease), border-color .28s var(--ease), background .28s var(--ease), box-shadow .28s var(--ease);
+      box-shadow:0 0 0 rgba(255,255,255,0);
+      width:100%;
+      text-align:left;
+    }
+    .drawer-link.with-arrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .drawer-link.with-arrow .arrow{
+      color:var(--muted);
+      font-size:1.25rem;
+      transition:transform .25s var(--ease), color .25s var(--ease);
+    }
+    .drawer-link:hover{
+      transform:translateX(-6px);
+      border-color:var(--line-2);
+      background:rgba(255,255,255,.05);
+      box-shadow:0 12px 26px rgba(0,0,0,.18);
+    }
+    .drawer-link.with-arrow:hover .arrow{
+      transform:translateX(3px);
+      color:var(--text);
+    }
+    .drawer.show .drawer-link{
+      animation:drawerIn .45s var(--ease) both;
+    }
+    .drawer.show .drawer-link:nth-child(1){animation-delay:.05s}
+    .drawer.show .drawer-link:nth-child(2){animation-delay:.10s}
+    .drawer.show .drawer-link:nth-child(3){animation-delay:.15s}
+    @keyframes drawerIn{
+      from{opacity:0;transform:translateX(22px)}
+      to{opacity:1;transform:translateX(0)}
+    }
+    .drawer-note{
+      margin-top:auto;
+      color:var(--muted);
+      font-size:.95rem;
+      border-top:1px solid var(--line);
+      padding-top:18px;
+    }
+
+    /* HERO */
+    .hero{padding:90px 0 70px}
+    .hero-grid{
+      display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:stretch;
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;
+      padding:10px 15px;border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:#dde6f6;
+      font-size:.93rem;
+    }
+    h1{
+      margin:18px 0 16px;
+      font-size:clamp(2.8rem,7vw,5.7rem);
+      line-height:.96;
+      letter-spacing:-.055em;
+      max-width:760px;
+    }
+    .lead{
+      max-width:760px;
+      font-size:1.08rem;
+      color:var(--muted);
+    }
+    .cta-row{
+      display:flex;gap:14px;flex-wrap:wrap;margin-top:30px;
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:15px 20px;border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      cursor:pointer;font-weight:750;
+      transition:transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);
+    }
+    .btn:hover{transform:translateY(-2px) scale(1.01);border-color:var(--line-2);background:rgba(255,255,255,.05);box-shadow:0 14px 28px rgba(0,0,0,.22)}
+    .btn.primary{
+      background:linear-gradient(180deg, rgba(245,247,251,.99), rgba(223,230,241,.95));
+      color:#0a0d12;border-color:rgba(255,255,255,.2);
+      box-shadow:0 16px 34px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.6);
+    }
+
+    .hero-card,.card{
+      background:linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .hero-card{padding:24px}
+    .mini-brand{
+      font-weight:900;
+      letter-spacing:.68em;
+      padding-left:.18em;
+      font-size:2rem;
+    }
+    .tagline{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:.98rem;
+    }
+    .stat-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;
+    }
+    .stat{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+      padding:18px;
+    }
+    .stat strong{
+      display:block;
+      margin-bottom:6px;
+      font-size:1.26rem;
+      letter-spacing:-.02em;
+    }
+
+    /* SECTIONS */
+    .section{padding:62px 0}
+    .section.tight-top{padding-top:38px}
+    .section h2{
+      margin:0 0 12px;
+      font-size:clamp(1.9rem,4vw,2.95rem);
+      line-height:1.02;
+      letter-spacing:-.045em;
+    }
+    .section-lead{
+      margin:0 0 28px;
+      max-width:760px;
+      color:var(--muted);
+      font-size:1.02rem;
+    }
+    .cards-3,.cards-2,.prices,.about-box{
+      display:grid;gap:18px;
+    }
+    .cards-3{grid-template-columns:repeat(3,1fr)}
+    .cards-2{grid-template-columns:repeat(2,1fr)}
+    .prices{grid-template-columns:repeat(3,1fr)}
+    .about-box{grid-template-columns:.95fr 1.05fr}
+    .card{padding:24px}
+    .card h3{
+      margin:0 0 8px;
+      font-size:1.2rem;
+      letter-spacing:-.02em;
+    }
+    .muted{color:var(--muted)}
+    .pill{
+      display:inline-block;
+      margin-bottom:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.025);
+      color:#dce4f5;
+      font-size:.84rem;
+    }
+
+    .steps{counter-reset:step}
+    .step{position:relative;padding-left:72px}
+    .step:before{
+      counter-increment:step;
+      content:counter(step);
+      position:absolute;left:0;top:0;
+      width:46px;height:46px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#f5f7fb;color:#0a0d12;font-weight:900;
+      box-shadow:0 8px 22px rgba(255,255,255,.06);
+    }
+
+    .price .num{
+      font-size:2rem;
+      font-weight:900;
+      letter-spacing:-.045em;
+    }
+    ul.clean{
+      margin:12px 0 0;
+      padding-left:18px;
+      color:var(--muted);
+    }
+
+    /* FAQ */
+    .faq{display:grid;gap:14px}
+    .faq details{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+      overflow:hidden;
+      transition:border-color .28s var(--ease), background .28s var(--ease), transform .28s var(--ease);
+    }
+    .faq details[open]{
+      border-color:var(--line-2);
+      background:rgba(255,255,255,.03);
+      transform:translateY(-1px);
+    }
+    .faq summary{
+      list-style:none;
+      cursor:pointer;
+      user-select:none;
+      padding:18px 20px;
+      font-weight:750;
+      position:relative;
+    }
+    .faq summary::-webkit-details-marker{display:none}
+    .faq summary::after{
+      content:"+";
+      position:absolute;right:18px;top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:1.3rem;
+      transition:transform .28s var(--ease), color .28s var(--ease);
+    }
+    .faq details[open] summary::after{
+      transform:translateY(-50%) rotate(45deg);
+      color:var(--text);
+    }
+    .answer{
+      padding:0 20px 18px;
+      color:var(--muted);
+      animation:fadeSlide .32s var(--ease);
+    }
+    @keyframes fadeSlide{
+      from{opacity:0;transform:translateY(-8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* CTA LOWER */
+    .center-box{
+      text-align:center;
+      padding:34px 0 18px;
+    }
+    .center-box h2{margin-bottom:46px}
+    .big-cta{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:18px 32px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.2);
+      background:linear-gradient(180deg, rgba(245,247,251,.99), rgba(223,230,241,.95));
+      color:#0a0d12;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 18px 42px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.65);
+      transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+    }
+    .big-cta:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 24px 48px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.65)}
+
+    /* FOOTER */
+    .footer{padding:34px 0 64px;color:var(--muted)}
+    .footer-line{
+      padding-top:26px;
+      border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    }
+    .small{font-size:.94rem;color:var(--muted)}
+
+    /* MODALS */
+    .modal{
+      position:fixed;inset:0;z-index:80;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+      background:rgba(3,6,10,.72);
+      backdrop-filter:blur(6px);
+      opacity:0;pointer-events:none;
+      transition:opacity .34s var(--ease);
+    }
+    .modal.show{
+      opacity:1;pointer-events:auto;
+    }
+    .modal-card{
+      width:min(920px,100%);
+      max-height:88vh;overflow:auto;
+      padding:22px;
+      border-radius:24px;
+      border:1px solid var(--line-2);
+      background:linear-gradient(180deg,#10151d 0%, #0d1117 100%);
+      box-shadow:0 30px 110px rgba(0,0,0,.48);
+      transform:translateY(24px) scale(.985);
+      opacity:.6;
+      transition:transform .36s var(--ease), opacity .36s var(--ease);
+    }
+    .modal.show .modal-card{
+      transform:translateY(0) scale(1);
+      opacity:1;
+    }
+    .modal-head{
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      margin-bottom:14px;
+    }
+    .close-btn{
+      width:44px;height:44px;border-radius:50%;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      font-size:1.15rem;
+      cursor:pointer;
+      transition:transform .25s var(--ease), background .25s var(--ease);
+    }
+    .close-btn:hover{transform:rotate(90deg);background:rgba(255,255,255,.05)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    input,select,textarea{
+      width:100%;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      outline:none;
+      font:inherit;
+    }
+    textarea{min-height:140px;resize:vertical}
+    .modal-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+
+    @media (max-width:960px){
+      .hero-grid,.cards-3,.cards-2,.prices,.about-box,.form-grid{grid-template-columns:1fr}
+      .hero{padding-top:58px}
+      .brand{font-size:.98rem;letter-spacing:.44em}
+      .mini-brand{font-size:1.7rem;letter-spacing:.58em}
+      .nav-chip{display:none}
+      .center-box h2{margin-bottom:36px}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">C N S Y</div>
+      <div class="nav-right">
+        <button class="nav-chip" id="openFormTop" type="button">Anfrage</button>
+        <button class="menu-btn" id="openDrawer" type="button" aria-label="Menü öffnen" onclick="showDrawerSafe()">
+          <div class="menu-bars"><span></span><span></span><span></span></div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="drawer-overlay" id="drawerOverlay" onclick="hideDrawerSafe()"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <div class="brand" style="font-size:.96rem">C N S Y</div>
+      <button class="drawer-close" id="closeDrawer" type="button" aria-label="Menü schließen" onclick="hideDrawerSafe()">×</button>
+    </div>
+    <div class="drawer-stage">
+      <div class="drawer-view root-view">
+        <div class="drawer-links">
+          <button class="drawer-link with-arrow" id="openShopSubmenu" type="button" onclick="showShopSubmenuSafe()">
+            <span>Shop</span><span class="arrow">›</span>
+          </button>
+          <button class="drawer-link" id="openSuccessDrawer" type="button" style="cursor:pointer;">Erfolge</button>
+          <button class="drawer-link" id="openSocialsDrawer" type="button" style="cursor:pointer;">Socials</button>
+        </div>
+      </div>
+
+      <div class="drawer-view sub-view" id="shopSubView">
+        <div class="submenu-top">
+          <button class="back-btn" id="closeShopSubmenu" type="button" aria-label="Zurück" onclick="hideShopSubmenuSafe()">‹</button>
+          <div class="submenu-title">Shop</div>
+        </div>
+        <div class="drawer-links">
+          <button class="drawer-link with-arrow" id="openPlansDrawer" type="button" style="cursor:pointer;"><span>Trainingspläne</span><span class="arrow">›</span></button>
+          <button class="drawer-link with-arrow" id="openProgramsDrawer" type="button" style="cursor:pointer;"><span>Programme</span><span class="arrow">›</span></button>
+          <button class="drawer-link with-arrow" id="openCoachingDrawer" type="button" style="cursor:pointer;"><span>Coaching</span><span class="arrow">›</span></button>
+          <button class="drawer-link with-arrow" id="openCnsyShopDrawer" type="button" style="cursor:pointer;"><span>CNSY Shop</span><span class="arrow">›</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-note">Consistency over motivation.</div>
+  </aside>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">C N S Y — Consistency over motivation</div>
+        <h1>Disziplin schlägt Motivation.</h1>
+        <p class="lead">
+          Individuelle Trainingspläne und ehrliches Coaching für junge Fußballer und Menschen,
+          die zu Hause stärker, fitter und konstanter werden wollen — mit Struktur, Betreuung und einem klaren Plan.
+        </p>
+        <div class="cta-row">
+          <button class="btn primary" id="openFormHero" type="button">Kostenlose Anfrage</button>
+          <button class="btn" id="openPackagesHero" type="button">Pakete ansehen</button>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="mini-brand">C N S Y</div>
+        <p class="tagline">Professionalität, Vertrauen und ein klarer Weg nach vorne.</p>
+        <div class="stat-grid">
+          <div class="stat">
+            <strong>Fußball-Fokus</strong>
+            <span class="muted">Athletik, Belastbarkeit und Struktur für junge Spieler.</span>
+          </div>
+          <div class="stat">
+            <strong>Home-Training</strong>
+            <span class="muted">Pläne, die auch ohne großes Gym sinnvoll funktionieren.</span>
+          </div>
+          <div class="stat">
+            <strong>Persönlich</strong>
+            <span class="muted">Direkter Kontakt, ehrliche Einschätzung, kein Fake-Guru-Vibe.</span>
+          </div>
+          <div class="stat">
+            <strong>Flexibel</strong>
+            <span class="muted">Anpassbar an Alltag, Verletzungen, Niveau und Ziel.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section tight-top" id="angebot">
+    <div class="wrap">
+      <h2>Wofür CNSY steht</h2>
+      <p class="section-lead">
+        Kein leeres Motivations-Gerede. Sondern ein klarer Plan, ehrliche Betreuung und Training,
+        das zu deinem Alltag passt — egal ob du Fußballer bist oder einfach fit werden willst.
+      </p>
+
+      <div class="cards-3">
+        <article class="card">
+          <div class="pill">Für Fußballer</div>
+          <h3>Athletik & Leistung</h3>
+          <p class="muted">Für junge Fußballer, die stärker, fitter, belastbarer und konstanter werden wollen — auch mit wenig Budget und viel Eigenmotivation.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Für Zuhause</div>
+          <h3>Trainingspläne ohne Umwege</h3>
+          <p class="muted">Individuelle Pläne, die an dein Equipment, deinen Zeitplan und dein Ziel angepasst sind — statt Copy-Paste-Workouts.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Betreuung</div>
+          <h3>Kontakt & Anpassung</h3>
+          <p class="muted">Du kannst Fragen stellen, Fortschritt teilen und deinen Plan bei Bedarf anpassen lassen, statt allein rumzurätseln.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ablauf">
+    <div class="wrap">
+      <h2>So läuft es ab</h2>
+      <p class="section-lead">Klar, simpel und ohne unnötigen Schnickschnack.</p>
+
+      <div class="cards-2 steps">
+        <article class="card step">
+          <h3>Anfrage ausfüllen</h3>
+          <p class="muted">Du schickst deine Ziele, deinen aktuellen Stand, dein Equipment und deinen Zeitrahmen.</p>
+        </article>
+        <article class="card step">
+          <h3>Kennenlernen</h3>
+          <p class="muted">Wir schauen gemeinsam, was realistisch ist und welches Paket für dich überhaupt Sinn ergibt.</p>
+        </article>
+        <article class="card step">
+          <h3>Plan & Start</h3>
+          <p class="muted">Du bekommst deinen individuellen Trainingsplan und eine klare Struktur für die Umsetzung.</p>
+        </article>
+        <article class="card step">
+          <h3>Betreuung & Anpassung</h3>
+          <p class="muted">Je nach Paket gibt es Feedback, Anpassungen und direkten Kontakt, wenn etwas nicht passt.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ueber">
+    <div class="wrap">
+      <h2>Über CNSY</h2>
+      <div class="about-box">
+        <article class="card">
+          <div class="pill">Wofür ich stehe</div>
+          <h3>Vertrauen, Struktur, Ergebnisse</h3>
+          <p class="muted">
+            Ich will Menschen nicht mit großen Versprechen blenden. Mir ist wichtig, dass Kunden mir vertrauen,
+            ihren Plan verstehen und am Ende echte Fortschritte sehen.
+          </p>
+          <p class="muted">
+            Mein Fokus liegt auf individuellem Training, das praktisch umsetzbar ist — besonders für junge Fußballer
+            und für Menschen, die zu Hause trainieren wollen.
+          </p>
+        </article>
+        <article class="card">
+          <div class="pill">Persönlicher Hintergrund</div>
+          <h3>Ich weiß, wie schwer es ist dranzubleiben.</h3>
+          <p class="muted">
+            Gerade wenn Fortschritt nicht linear läuft, Motivation schwankt oder eine Verletzung dazwischenkommt,
+            wird Konstanz schwer. Genau deshalb soll Coaching nicht nur aus einem Plan bestehen, sondern aus ehrlicher Begleitung.
+          </p>
+          <p class="muted">
+            Auch durch eigene Verletzungserfahrung weiß ich, wie frustrierend Rückschritte sein können — und wie wichtig ein klarer,
+            realistischer Weg zurück ist.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Häufige Fragen</h2>
+      <div class="faq">
+        <details>
+          <summary>Wie individuell ist mein Trainingsplan wirklich?</summary>
+          <div class="answer">Nicht jeder bekommt denselben Plan. Entscheidend sind dein Ziel, dein aktueller Stand, dein Alltag, dein Zeitbudget und das Equipment, das dir wirklich zur Verfügung steht.</div>
+        </details>
+        <details>
+          <summary>Ist das nur für Fußballer?</summary>
+          <div class="answer">Nein. Fußballer sind ein Schwerpunkt, aber CNSY richtet sich auch an Menschen, die zu Hause sinnvoll trainieren und fitter werden wollen.</div>
+        </details>
+        <details>
+          <summary>Brauche ich teures Equipment?</summary>
+          <div class="answer">Nein. Gutes Training definiert sich nicht ausschließlich durch teures Equipment. Mit Körpergewicht, Bändern, Kurzhanteln oder einfachen Hilfsmitteln kann man bereits sehr sinnvoll arbeiten. Der Plan wird an das angepasst, was du wirklich hast.</div>
+        </details>
+        <details>
+          <summary>Gibt es Ernährungspläne?</summary>
+          <div class="answer">Aktuell liegt der Fokus bewusst auf Training und Coaching. Ernährung kann später dazukommen, wenn dafür die passende Fortbildung und Spezialisierung da ist.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="kontakt">
+    <div class="wrap center-box">
+      <h2>Bereit für den nächsten Schritt?</h2>
+      <button class="big-cta" id="openFormBottom" type="button">Zum Anfrageformular</button>
+    </div>
+  </section>
+
+  <footer class="footer wrap">
+    <div class="footer-line">
+      <div>
+        <div class="brand" style="font-size:.95rem">C N S Y</div>
+        <div class="small">Consistency over motivation.</div>
+      </div>
+      <div class="small">
+        <a href="#">Impressum</a> · <a href="#">Datenschutz</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal" id="packagesModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Pakete</div>
+          <h2 style="margin:0;">Preisstruktur zum Start</h2>
+        </div>
+        <button class="close-btn" id="closePackages" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Fair für den Kunden, aber auch sinnvoll für die Arbeit dahinter. Keine überteuerten Fantasiepreise.
+      </p>
+      <div class="prices">
+        <article class="card price">
+          <div class="pill">Einmalig</div>
+          <h3>Trainingsplan</h3>
+          <div class="num">39€</div>
+          <ul class="clean">
+            <li>Individueller Plan</li>
+            <li>Orientiert an deinem Ziel</li>
+            <li>Für Zuhause / Equipment anpassbar</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Light</h3>
+          <div class="num">79€</div>
+          <ul class="clean">
+            <li>Trainingsplan + Anpassungen</li>
+            <li>Regelmäßiger Kontakt</li>
+            <li>Ideal zum Einstieg</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Pro</h3>
+          <div class="num">119€</div>
+          <ul class="clean">
+            <li>Engere Betreuung</li>
+            <li>Mehr direkte Rückfragen</li>
+            <li>Für ambitioniertere Ziele</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="formModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Anfrage</div>
+          <h2 style="margin:0;">Anfrageformular</h2>
+        </div>
+        <button class="close-btn" id="closeForm" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Erzähl kurz, worum es geht. So kann ich direkt einschätzen, ob und wie ich dir sinnvoll helfen kann.
+      </p>
+      <form action="mailto:deinname@beispiel.de" method="post" enctype="text/plain">
+        <div class="form-grid">
+          <div>
+            <label class="small" for="name">Name</label>
+            <input id="name" name="Name" type="text" placeholder="Dein Name">
+          </div>
+          <div>
+            <label class="small" for="email">E-Mail</label>
+            <input id="email" name="E-Mail" type="email" placeholder="deinname@email.de">
+          </div>
+          <div>
+            <label class="small" for="ziel">Dein Ziel</label>
+            <input id="ziel" name="Ziel" type="text" placeholder="z. B. fitter werden, athletischer, stärker">
+          </div>
+          <div>
+            <label class="small" for="level">Aktueller Stand</label>
+            <select id="level" name="Stand">
+              <option>Anfänger</option>
+              <option>Fortgeschritten</option>
+              <option>Fußballer / sportlich aktiv</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="small" for="nachricht">Kurz zu dir / Equipment / Zeit pro Woche</label>
+          <textarea id="nachricht" name="Nachricht" placeholder="Erzähl kurz, was du machen willst, wie oft du trainieren kannst und was dir zur Verfügung steht."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn primary" type="submit">Anfrage senden</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  
+  <div class="modal" id="plansModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Trainingspläne</div>
+          <h2 style="margin:0;">Individuellen Trainingsplan anfragen</h2>
+        </div>
+        <button class="close-btn" id="closePlans" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Damit der Plan wirklich zu dir passt, brauche ich vorab ein paar klare Infos.
+      </p>
+      <form action="mailto:deinname@beispiel.de" method="post" enctype="text/plain">
+        <div class="form-grid">
+          <div>
+            <label class="small" for="plan_name">Name</label>
+            <input id="plan_name" name="Name" type="text" placeholder="Dein Name">
+          </div>
+          <div>
+            <label class="small" for="plan_email">E-Mail</label>
+            <input id="plan_email" name="E-Mail" type="email" placeholder="deinname@email.de">
+          </div>
+          <div>
+            <label class="small" for="plan_goal">Ziel</label>
+            <select id="plan_goal" name="Ziel">
+              <option>Muskelaufbau</option>
+              <option>Athletischer werden</option>
+              <option>Fußball-spezifisch</option>
+              <option>Fitter werden</option>
+              <option>Abnehmen</option>
+              <option>Allgemeine Fitness</option>
+            </select>
+          </div>
+          <div>
+            <label class="small" for="plan_level">Trainingsstand</label>
+            <select id="plan_level" name="Trainingsstand">
+              <option>Anfänger</option>
+              <option>Fortgeschritten</option>
+              <option>Sehr sportlich</option>
+            </select>
+          </div>
+          <div>
+            <label class="small" for="plan_place">Trainingsort</label>
+            <select id="plan_place" name="Trainingsort">
+              <option>Zuhause</option>
+              <option>Gym</option>
+              <option>Beides</option>
+            </select>
+          </div>
+          <div>
+            <label class="small" for="plan_freq">Wie oft pro Woche?</label>
+            <select id="plan_freq" name="Häufigkeit">
+              <option>1–2x</option>
+              <option>3x</option>
+              <option>4x</option>
+              <option>5x oder mehr</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="small" for="plan_eq">Verfügbares Equipment</label>
+          <input id="plan_eq" name="Equipment" type="text" placeholder="z. B. Kurzhanteln, Bänder, Körpergewicht, Gym">
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div>
+            <label class="small" for="plan_age">Alter</label>
+            <input id="plan_age" name="Alter" type="number" placeholder="z. B. 19">
+          </div>
+          <div>
+            <label class="small" for="plan_time">Zeit pro Einheit</label>
+            <select id="plan_time" name="Zeit pro Einheit">
+              <option>20–30 Minuten</option>
+              <option>30–45 Minuten</option>
+              <option>45–60 Minuten</option>
+              <option>60+ Minuten</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div>
+            <label class="small" for="plan_height">Körpergröße</label>
+            <input id="plan_height" name="Körpergröße" type="text" placeholder="z. B. 182 cm">
+          </div>
+          <div>
+            <label class="small" for="plan_weight">Körpergewicht</label>
+            <input id="plan_weight" name="Körpergewicht" type="text" placeholder="z. B. 78 kg">
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="small" for="plan_notes">Verletzungen / Einschränkungen / Wünsche</label>
+          <textarea id="plan_notes" name="Notizen" placeholder="Schreib hier alles rein, was für die Erstellung wichtig ist."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn primary" type="submit">Trainingsplan anfragen</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="programsModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Programme</div>
+          <h2 style="margin:0;">Strukturierte Programme & Coaching</h2>
+        </div>
+        <button class="close-btn" id="closePrograms" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Programme sind ideal, wenn du etwas Klar aufgebautes willst. Coaching bleibt die individuellere Premium-Variante.
+      </p>
+      <div class="cards-2">
+        <article class="card">
+          <div class="pill">Digitales Produkt</div>
+          <h3>Feste Programme</h3>
+          <p class="muted">Zum Beispiel ein Home-Plan, ein Athletik-Programm oder ein Fußball-spezifischer Ablauf, den du direkt kaufen und selbst umsetzen kannst.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Premium</div>
+          <h3>Coaching</h3>
+          <p class="muted">Wenn du Betreuung, Anpassungen und direkten Austausch willst, ist Coaching die stärkere und persönlichere Lösung.</p>
+        </article>
+      </div>
+      <div class="prices" style="margin-top:18px;">
+        <article class="card price">
+          <div class="pill">Einmalig</div>
+          <h3>Programm</h3>
+          <div class="num">ab 29€</div>
+          <ul class="clean">
+            <li>Fester Ablauf</li>
+            <li>Direkt nutzbar</li>
+            <li>Kein 1:1 Support</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Light</h3>
+          <div class="num">79€</div>
+          <ul class="clean">
+            <li>Individueller Plan</li>
+            <li>Regelmäßige Anpassungen</li>
+            <li>Kontakt inklusive</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Pro</h3>
+          <div class="num">119€</div>
+          <ul class="clean">
+            <li>Engere Betreuung</li>
+            <li>Mehr Rückfragen</li>
+            <li>Für ambitionierte Ziele</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="cnsyShopModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">CNSY Shop</div>
+          <h2 style="margin:0;">Merch & spätere Produkte</h2>
+        </div>
+        <button class="close-btn" id="closeCnsyShop" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Dieser Bereich kann später für gebrandete Produkte wie Handtücher, Trainingsequipment oder andere CNSY-Artikel genutzt werden.
+      </p>
+      <div class="cards-3">
+        <article class="card">
+          <div class="pill">Später</div>
+          <h3>Handtücher</h3>
+          <p class="muted">Einfacher Start für erste gebrandete Produkte.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Später</div>
+          <h3>Training Basics</h3>
+          <p class="muted">Kleine Artikel, die zum Training und zur Brand passen.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Später</div>
+          <h3>CNSY Essentials</h3>
+          <p class="muted">Saubere Erweiterung, wenn die Marke weiter wächst.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="successModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Erfolge</div>
+          <h2 style="margin:0;">Nachweise, Entwicklung & Feedback</h2>
+        </div>
+        <button class="close-btn" id="closeSuccess" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Dieser Bereich ist ideal für alles, was Vertrauen aufbaut und deine Arbeit sichtbar belegt.
+      </p>
+
+      <div class="pill">Vorher / Nachher</div>
+      <div class="cards-2" style="margin-bottom:18px;">
+        <article class="card">
+          <h3>Veränderung sichtbar machen</h3>
+          <p class="muted">Mit Einverständnis von Kunden kannst du hier später starke Vorher-/Nachher-Beispiele zeigen, die direkte Entwicklung greifbar machen.</p>
+        </article>
+        <article class="card">
+          <h3>Leistung & Form</h3>
+          <p class="muted">Nicht nur Optik, sondern auch Fortschritte bei Athletik, Routine, Belastbarkeit oder Bewegungsqualität können hier dargestellt werden.</p>
+        </article>
+      </div>
+
+      <div class="pill">Rezensionen</div>
+      <div class="review-strip" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;margin-bottom:18px;">
+        <article class="card" style="min-width:280px;scroll-snap-align:start;">
+          <h3>„Man merkt, dass hier wirklich angepasst wird.“</h3>
+          <p class="muted">Platz für spätere ehrliche Kundenstimmen, die man seitlich durchwischen kann.</p>
+        </article>
+        <article class="card" style="min-width:280px;scroll-snap-align:start;">
+          <h3>„Der Plan hat endlich zu meinem Alltag gepasst.“</h3>
+          <p class="muted">Kurze, echte Aussagen wirken später oft stärker als lange Texte.</p>
+        </article>
+        <article class="card" style="min-width:280px;scroll-snap-align:start;">
+          <h3>„Strukturiert, motivierend und nachvollziehbar.“</h3>
+          <p class="muted">Ideal für Vertrauen, gerade wenn die Brand wächst.</p>
+        </article>
+      </div>
+
+      <div class="pill">Lizenzen & Nachweise</div>
+      <div class="cards-3">
+        <article class="card">
+          <div class="pill">Qualifikation</div>
+          <h3>Lizenzen</h3>
+          <p class="muted">Hier kannst du später Ausbildungen, Zertifikate und fachliche Nachweise sauber präsentieren.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Beleg</div>
+          <h3>Fortbildungen</h3>
+          <p class="muted">Zusätzliche Spezialisierungen machen deine Arbeit greifbarer und professioneller.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Vertrauen</div>
+          <h3>Nachweise</h3>
+          <p class="muted">Alles, was Kunden zeigt, dass hinter CNSY echte Substanz steckt.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="socialsModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Socials</div>
+          <h2 style="margin:0;">Direkter Einblick & Kontakt</h2>
+        </div>
+        <button class="close-btn" id="closeSocials" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Hier können deine wichtigsten Kanäle direkt verlinkt werden.
+      </p>
+      <div class="cards-2">
+        <a class="card social-card" href="https://instagram.com/" target="_blank" rel="noopener noreferrer" style="display:block;">
+          <div class="pill">Instagram</div>
+          <div style="font-size:2rem;line-height:1;">📸</div>
+          <h3 style="margin-top:10px;">Instagram öffnen</h3>
+          <p class="muted">Für Content, Einblicke, Training und Aufbau der Brand.</p>
+        </a>
+        <a class="card social-card" href="https://wa.me/" target="_blank" rel="noopener noreferrer" style="display:block;">
+          <div class="pill">WhatsApp</div>
+          <div style="font-size:2rem;line-height:1;">💬</div>
+          <h3 style="margin-top:10px;">WhatsApp öffnen</h3>
+          <p class="muted">Für schnellen direkten Kontakt, sobald du den Weg dafür freigeben willst.</p>
+        </a>
+      </div>
+      <p class="small" style="margin-top:14px;">Die Links sind aktuell Platzhalter und können später mit deinen echten Profilen ersetzt werden.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="coachingModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="pill" style="margin-bottom:8px;">Coaching</div>
+          <h2 style="margin:0;">Individuelle Betreuung</h2>
+        </div>
+        <button class="close-btn" id="closeCoaching" type="button" aria-label="Schließen">×</button>
+      </div>
+      <p class="section-lead" style="margin-bottom:18px;">
+        Coaching ist die persönlichere Premium-Option: mit Anpassungen, direktem Kontakt und mehr Tiefe als bei einem festen Programm.
+      </p>
+      <div class="cards-2">
+        <article class="card">
+          <div class="pill">Light</div>
+          <h3>Coaching Light</h3>
+          <p class="muted">Für alle, die einen individuellen Plan und regelmäßige Anpassungen wollen, ohne direkt maximalen Umfang zu brauchen.</p>
+        </article>
+        <article class="card">
+          <div class="pill">Pro</div>
+          <h3>Coaching Pro</h3>
+          <p class="muted">Für ambitioniertere Ziele mit engerer Betreuung, mehr Rückfragen und mehr persönlicher Begleitung.</p>
+        </article>
+      </div>
+      <div class="prices" style="margin-top:18px;">
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Light</h3>
+          <div class="num">79€</div>
+          <ul class="clean">
+            <li>Individueller Plan</li>
+            <li>Regelmäßige Anpassungen</li>
+            <li>Direkter Kontakt</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Monatlich</div>
+          <h3>Coaching Pro</h3>
+          <div class="num">119€</div>
+          <ul class="clean">
+            <li>Engere Betreuung</li>
+            <li>Mehr Rückfragen</li>
+            <li>Mehr Tiefe</li>
+          </ul>
+        </article>
+        <article class="card price">
+          <div class="pill">Info</div>
+          <h3>Start</h3>
+          <div class="num">nach Anfrage</div>
+          <ul class="clean">
+            <li>Erstgespräch</li>
+            <li>Passendes Modell wählen</li>
+            <li>Danach gemeinsamer Start</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    function bindModal(openIds, modalId, closeId){
+      const modal = document.getElementById(modalId);
+      const closeBtn = document.getElementById(closeId);
+      const openers = openIds.map(id => document.getElementById(id)).filter(Boolean);
+
+      if(!modal || !closeBtn){ return; }
+
+      function openModal(){
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden','false');
+        document.body.style.overflow='hidden';
+      }
+      function closeModal(){
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden','true');
+        document.body.style.overflow='';
+      }
+
+      openers.forEach(el => el.addEventListener('click', openModal));
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+    }
+
+    bindModal(['openPackagesHero'], 'packagesModal', 'closePackages');
+    bindModal(['openFormTop','openFormHero','openFormBottom'], 'formModal', 'closeForm');
+    bindModal(['openPlansDrawer'], 'plansModal', 'closePlans');
+    bindModal(['openProgramsDrawer'], 'programsModal', 'closePrograms');
+    bindModal(['openCoachingDrawer'], 'coachingModal', 'closeCoaching');
+    bindModal(['openCnsyShopDrawer'], 'cnsyShopModal', 'closeCnsyShop');
+    bindModal(['openSuccessDrawer'], 'successModal', 'closeSuccess');
+    bindModal(['openSocialsDrawer'], 'socialsModal', 'closeSocials');
+
+    const drawer = document.getElementById('drawer');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+
+    function resetDrawerSafe(){
+      if(drawer){ drawer.classList.remove('submenu-open'); }
+    }
+    function showDrawerSafe(){
+      if(!drawer || !drawerOverlay){ return; }
+      drawer.classList.add('show');
+      drawerOverlay.classList.add('show');
+      document.body.style.overflow='hidden';
+      resetDrawerSafe();
+    }
+    function hideDrawerSafe(){
+      if(!drawer || !drawerOverlay){ return; }
+      drawer.classList.remove('show');
+      drawerOverlay.classList.remove('show');
+      document.body.style.overflow='';
+      setTimeout(resetDrawerSafe, 220);
+    }
+    function showShopSubmenuSafe(){
+      if(drawer){ drawer.classList.add('submenu-open'); }
+    }
+    function hideShopSubmenuSafe(){
+      if(drawer){ drawer.classList.remove('submenu-open'); }
+    }
+
+    // expose for inline handlers
+    window.showDrawerSafe = showDrawerSafe;
+    window.hideDrawerSafe = hideDrawerSafe;
+    window.showShopSubmenuSafe = showShopSubmenuSafe;
+    window.hideShopSubmenuSafe = hideShopSubmenuSafe;
+
+    const openDrawer = document.getElementById('openDrawer');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const openShopSubmenu = document.getElementById('openShopSubmenu');
+    const closeShopSubmenu = document.getElementById('closeShopSubmenu');
+
+    if(openDrawer){ openDrawer.addEventListener('click', showDrawerSafe); }
+    if(closeDrawer){ closeDrawer.addEventListener('click', hideDrawerSafe); }
+    if(drawerOverlay){ drawerOverlay.addEventListener('click', hideDrawerSafe); }
+    if(openShopSubmenu){ openShopSubmenu.addEventListener('click', showShopSubmenuSafe); }
+    if(closeShopSubmenu){ closeShopSubmenu.addEventListener('click', hideShopSubmenuSafe); }
+
+    ['openSuccessDrawer','openSocialsDrawer'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el){ el.addEventListener('click', hideDrawerSafe); }
+    });
+    ['openPlansDrawer','openProgramsDrawer','openCoachingDrawer','openCnsyShopDrawer'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el){ el.addEventListener('click', hideDrawerSafe); }
+    });
+
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        if(drawer && drawer.classList.contains('submenu-open')) hideShopSubmenuSafe();
+        else hideDrawerSafe();
+      }
+    });
+  </script>
+
+
+<div class="modal" id="previewModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Dein Plan Preview</h2>
+      <button class="close-btn" id="closePreview">×</button>
+    </div>
+
+    <p class="section-lead">So könnte dein Trainingsplan aussehen:</p>
+
+    <div class="card">
+      <h3>Tag 1</h3>
+      <p class="muted">Push Ups – 3x12<br>Squats – 3x15<br>Plank – 3x30s</p>
+    </div>
+
+    <div class="card">
+      <h3>Tag 2</h3>
+      <p class="muted">Core + Stabilität<br>Mobility</p>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      Das ist nur ein Ausschnitt. Dein kompletter Plan wird individuell erstellt.
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn primary" id="goToForm">Vollständigen Plan freischalten</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const preview = document.getElementById('previewModal');
+  const openBtn = document.getElementById('openPreview');
+  const closeBtn = document.getElementById('closePreview');
+  const goToForm = document.getElementById('goToForm');
+  const formModal = document.getElementById('formModal');
+
+  if(openBtn){
+    openBtn.onclick = () => {
+      preview.classList.add('show');
+      document.body.style.overflow='hidden';
+    };
+  }
+
+  if(closeBtn){
+    closeBtn.onclick = () => {
+      preview.classList.remove('show');
+      document.body.style.overflow='';
+    };
+  }
+
+  if(goToForm){
+    goToForm.onclick = () => {
+      preview.classList.remove('show');
+      if(formModal){
+        formModal.classList.add('show');
+      }
+    };
+  }
+})();
+</script>
+
+</body>
+</html>
